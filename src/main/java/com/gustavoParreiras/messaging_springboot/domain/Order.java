@@ -4,9 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity(name = "order")
-@Table(name = "order")
+@Entity
+@Table(name = "orders")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -19,8 +20,8 @@ public class Order {
     private String id;
     private String name;
 
-    @OneToOne(mappedBy = "oder",cascade = CascadeType.ALL)
-    private Item items;
+    @OneToMany(mappedBy = "items_order",cascade = CascadeType.ALL)
+    private List<Item> items;
 
     private Double price;
     private LocalDateTime orderDate;
