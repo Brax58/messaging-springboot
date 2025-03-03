@@ -1,45 +1,30 @@
-version: '2'
+version: '3.8'
 services:
-  zookeeper:
-    hostname: zookeeper
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
+  app:
+    build: .
+    container_name: pizzaria_app
     ports:
-      - "22181:2181"
-    networks:
-      - pizzaria
-
-  kafka:
-    hostname: kafka
-    image: confluentinc/cp-kafka:latest
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pizzaria
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
     depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - pizzaria
+      - db
 
-  postgres:
+  db:
     image: postgres:latest
-    hostname: postgres
+    container_name: pizzaria_db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: pizzaria
+      - POSTGRES_DB=pizzaria
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
     ports:
       - "5432:5432"
-    networks:
-      - pizzaria
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-networks:
-  pizzaria:
-    driver: bridge
+volumes:
+  postgres_data:
